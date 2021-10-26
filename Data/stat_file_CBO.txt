@@ -1,0 +1,12 @@
+
+*** DEVICE (GeForce GTX 1650 with Max-Q Design) (2020-10-18 23: 2:11)
+--- IMAGE = 8(Data/Input/Grass_texture_2048_2048.jpg), GF_SIZE = 7, N_EXE = 7,
+     KER = 111, GWS = (2048, 2048), LWS = (32, 16), Ave_time(S_to_E): 7.069ms
+
+*** DEVICE (NVIDIA GeForce GTX 1650 with Max-Q Design) (2021- 9- 9 15:55:21)
+--- IMAGE = 8(Data/Input/Grass_texture_2048_2048.jpg), GF_SIZE = 7, N_EXE = 7,
+     KER = 111, GWS = (2048, 2048), LWS = (32, 16), Ave_time(S_to_E): 6.946ms
+
+*** DEVICE (NVIDIA GeForce GTX 1650 with Max-Q Design) (2021- 9- 9 16: 1: 0)
+--- IMAGE = 8(Data/Input/Grass_texture_2048_2048.jpg), GF_SIZE = 7, N_EXE = 7,
+     KER = 111, GWS = (2048, 2048), LWS = (32, 16), Ave_time(S_to_E): 7.196ms
