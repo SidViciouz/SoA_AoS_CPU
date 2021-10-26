@@ -158,6 +158,7 @@
     <ClInclude Include="Source\Util\my_OpenCL_util_2_2.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Source\Kernel\AoS_GS.cl" />
     <None Include="Source\Kernel\SoA_GS.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

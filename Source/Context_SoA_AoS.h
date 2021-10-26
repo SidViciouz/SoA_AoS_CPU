@@ -10,10 +10,14 @@
 #define __CONTEXT_SOA_AOS__
 
 #define KERNEL1 "Source/Kernel/SoA_GS.cl"
-#define KERNEL2 "Source/Kernel/Aos_GS.cl"
+#define KERNEL2 "Source/Kernel/AoS_GS.cl"
+#define KERNEL3 "Source/Kernel/SoA_SO.cl"
+#define KERNEL4 "Source/Kernel/AoS_SO.cl"
 
 #define KERNELNAME1 "soa_gs_kernel"
 #define KERNELNAME2 "aos_gs_kernel"
+#define KERNELNAME3 "soa_so_kernel"
+#define KERNELNAME4 "aos_so_kernel"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,8 +57,8 @@ typedef struct _Context {
 
     cl_kernel my_kernel;
 
-    cl_mem input_buffer_object;
-    cl_mem output_buffer_object;
+    cl_mem input_buffer_object[4];
+    cl_mem output_buffer_object[4];
 
     size_t global_work_size[2];
     size_t local_work_size[2];

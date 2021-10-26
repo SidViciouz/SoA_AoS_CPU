@@ -119,16 +119,16 @@ int main(int argc, char* argv[]) {
         free(context.AoS_image_output);
     }
     else if (IMAGE_OPERATION == SoA_GS_GPU) {
-        //prepare_SoA_input_and_output();
+        prepare_SoA_input_and_output();
 
         initialize_OpenCL();
         set_local_work_size_and_kernel_arguments();
         run_OpenCL_kernel();
 
-        //convert_SoA_output_to_output_image_data();
+        convert_SoA_output_to_output_image_data();
 
         write_output_image_to_file32(OUTPUT_FILE_NAME);
-        /*
+        
         free(context.SoA_image_input.R_plane);
         free(context.SoA_image_input.G_plane);
         free(context.SoA_image_input.B_plane);
@@ -136,7 +136,53 @@ int main(int argc, char* argv[]) {
         free(context.SoA_image_output.R_plane);
         free(context.SoA_image_output.G_plane);
         free(context.SoA_image_output.B_plane);
-        free(context.SoA_image_output.A_plane);*/
+        free(context.SoA_image_output.A_plane);
+    }
+    else if (IMAGE_OPERATION == AoS_GS_GPU) {
+        prepare_AoS_input_and_output();
+        
+        initialize_OpenCL();
+        set_local_work_size_and_kernel_arguments();
+        run_OpenCL_kernel();
+        
+        convert_AoS_output_to_output_image_data();
+        write_output_image_to_file32(OUTPUT_FILE_NAME);
+
+        free(context.AoS_image_input);
+        free(context.AoS_image_output);
+    }
+    else if (IMAGE_OPERATION == SoA_SO_GPU) {
+        prepare_SoA_input_and_output();
+
+        initialize_OpenCL();
+        set_local_work_size_and_kernel_arguments();
+        run_OpenCL_kernel();
+
+        convert_SoA_output_to_output_image_data();
+
+        write_output_image_to_file32(OUTPUT_FILE_NAME);
+
+        free(context.SoA_image_input.R_plane);
+        free(context.SoA_image_input.G_plane);
+        free(context.SoA_image_input.B_plane);
+        free(context.SoA_image_input.A_plane);
+        free(context.SoA_image_output.R_plane);
+        free(context.SoA_image_output.G_plane);
+        free(context.SoA_image_output.B_plane);
+        free(context.SoA_image_output.A_plane);
+    }
+    else if (IMAGE_OPERATION == AoS_SO_GPU) {
+        prepare_AoS_input_and_output();
+
+        initialize_OpenCL();
+        set_local_work_size_and_kernel_arguments();
+        run_OpenCL_kernel();
+
+        convert_AoS_output_to_output_image_data();
+        write_output_image_to_file32(OUTPUT_FILE_NAME);
+
+        free(context.AoS_image_input);
+        free(context.AoS_image_output);
     }
     else {
         fprintf(stdout, "^^^ Nothing has been done!\n");
