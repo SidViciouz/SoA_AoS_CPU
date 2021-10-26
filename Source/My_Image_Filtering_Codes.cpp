@@ -167,6 +167,10 @@ int initialize_OpenCL(void) {
     program_length = read_kernel_from_file(KERNEL1, &program_source);
 #elif IMAGE_OPERATION == 5
     program_length = read_kernel_from_file(KERNEL2, &program_source);
+#elif IMAGE_OPERATION == 6
+    program_length = read_kernel_from_file(KERNEL3, &program_source);
+#elif IMAGE_OPERATION == 7
+    program_length = read_kernel_from_file(KERNEL4, &program_source);
 #endif
 
     my_program = clCreateProgramWithSource(my_context, 1, (const char**)&program_source, &program_length, &error_code);
@@ -180,6 +184,10 @@ int initialize_OpenCL(void) {
     context.my_kernel = clCreateKernel(my_program, KERNELNAME1, &error_code);
 #elif IMAGE_OPERATION == 5
     context.my_kernel = clCreateKernel(my_program, KERNELNAME2, &error_code);
+#elif IMAGE_OPERATION == 6
+    context.my_kernel = clCreateKernel(my_program, KERNELNAME3, &error_code);
+#elif IMAGE_OPERATION == 7
+    context.my_kernel = clCreateKernel(my_program, KERNELNAME4, &error_code);
 #endif
     if (CHECK_ERROR_CODE(error_code)) return 1;
 
@@ -197,6 +205,31 @@ int initialize_OpenCL(void) {
     if (CHECK_ERROR_CODE(error_code)) return 1;
 
     context.output_buffer_object[0] = clCreateBuffer(my_context, CL_MEM_WRITE_ONLY, context.image_data_bytes * 4, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 6
+    for (int i = 0; i < 4; i++) {
+        context.input_buffer_object[i] = clCreateBuffer(my_context, CL_MEM_READ_ONLY, context.image_data_bytes, NULL, &error_code);
+        if (CHECK_ERROR_CODE(error_code)) return 1;
+
+        context.output_buffer_object[i] = clCreateBuffer(my_context, CL_MEM_WRITE_ONLY, context.image_data_bytes, NULL, &error_code);
+        if (CHECK_ERROR_CODE(error_code)) return 1;
+    }
+    context.GX_buffer_object = clCreateBuffer(my_context, CL_MEM_READ_ONLY,9, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    context.GY_buffer_object = clCreateBuffer(my_context, CL_MEM_READ_ONLY, 9, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 7
+    context.input_buffer_object[0] = clCreateBuffer(my_context, CL_MEM_READ_ONLY, context.image_data_bytes * 4, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    context.output_buffer_object[0] = clCreateBuffer(my_context, CL_MEM_WRITE_ONLY, context.image_data_bytes * 4, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    context.GX_buffer_object = clCreateBuffer(my_context, CL_MEM_READ_ONLY, 9, NULL, &error_code);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    context.GY_buffer_object = clCreateBuffer(my_context, CL_MEM_READ_ONLY, 9, NULL, &error_code);
     if (CHECK_ERROR_CODE(error_code)) return 1;
 #endif
 
@@ -220,6 +253,39 @@ int initialize_OpenCL(void) {
 #elif IMAGE_OPERATION == 5
     clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[0], CL_FALSE, 0,
         context.image_data_bytes*4, context.AoS_image_input, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 6
+    clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[0], CL_FALSE, 0,
+        context.image_data_bytes, context.SoA_image_input.R_plane, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[1], CL_FALSE, 0,
+        context.image_data_bytes, context.SoA_image_input.G_plane, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[2], CL_FALSE, 0,
+        context.image_data_bytes, context.SoA_image_input.B_plane, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[3], CL_FALSE, 0,
+        context.image_data_bytes, context.SoA_image_input.A_plane, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+
+    clEnqueueWriteBuffer(context.my_queue, context.GX_buffer_object, CL_FALSE, 0,
+        9, GX, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+    clEnqueueWriteBuffer(context.my_queue, context.GY_buffer_object, CL_FALSE, 0,
+        9, GY, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 7
+    clEnqueueWriteBuffer(context.my_queue, context.input_buffer_object[0], CL_FALSE, 0,
+        context.image_data_bytes * 4, context.AoS_image_input, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+    clEnqueueWriteBuffer(context.my_queue, context.GX_buffer_object, CL_FALSE, 0,
+        9, GX, 0, NULL, NULL);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+    clEnqueueWriteBuffer(context.my_queue, context.GY_buffer_object, CL_FALSE, 0,
+        9, GY, 0, NULL, NULL);
     if (CHECK_ERROR_CODE(error_code)) return 1;
 #endif
     clFinish(context.my_queue);
@@ -254,6 +320,28 @@ int set_local_work_size_and_kernel_arguments(void) {
     error_code |= clSetKernelArg(context.my_kernel, 2, sizeof(int), &context.image_width);
     error_code |= clSetKernelArg(context.my_kernel, 3, sizeof(int), &context.image_height);
     if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 6
+    error_code = clSetKernelArg(context.my_kernel, 0, sizeof(cl_mem), &context.input_buffer_object[0]);
+    error_code |= clSetKernelArg(context.my_kernel, 1, sizeof(cl_mem), &context.input_buffer_object[1]);
+    error_code |= clSetKernelArg(context.my_kernel, 2, sizeof(cl_mem), &context.input_buffer_object[2]);
+    error_code |= clSetKernelArg(context.my_kernel, 3, sizeof(cl_mem), &context.input_buffer_object[3]);
+    error_code |= clSetKernelArg(context.my_kernel, 4, sizeof(cl_mem), &context.output_buffer_object[0]);
+    error_code |= clSetKernelArg(context.my_kernel, 5, sizeof(cl_mem), &context.output_buffer_object[1]);
+    error_code |= clSetKernelArg(context.my_kernel, 6, sizeof(cl_mem), &context.output_buffer_object[2]);
+    error_code |= clSetKernelArg(context.my_kernel, 7, sizeof(cl_mem), &context.output_buffer_object[3]);
+    error_code |= clSetKernelArg(context.my_kernel, 8, sizeof(int), &context.image_width);
+    error_code |= clSetKernelArg(context.my_kernel, 9, sizeof(int), &context.image_height);
+    error_code |= clSetKernelArg(context.my_kernel, 10, sizeof(cl_mem), &context.GX_buffer_object);
+    error_code |= clSetKernelArg(context.my_kernel, 11, sizeof(cl_mem), &context.GY_buffer_object);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
+#elif IMAGE_OPERATION == 7
+    error_code = clSetKernelArg(context.my_kernel, 0, sizeof(cl_mem), &context.input_buffer_object[0]);
+    error_code |= clSetKernelArg(context.my_kernel, 1, sizeof(cl_mem), &context.output_buffer_object[0]);
+    error_code |= clSetKernelArg(context.my_kernel, 2, sizeof(int), &context.image_width);
+    error_code |= clSetKernelArg(context.my_kernel, 3, sizeof(int), &context.image_height);
+    error_code |= clSetKernelArg(context.my_kernel, 4, sizeof(cl_mem), &context.GX_buffer_object);
+    error_code |= clSetKernelArg(context.my_kernel, 5, sizeof(cl_mem), &context.GY_buffer_object);
+    if (CHECK_ERROR_CODE(error_code)) return 1;
 #endif
 
     return 0;
@@ -268,7 +356,7 @@ int run_OpenCL_kernel(void) {
 
     clWaitForEvents(1, &context.event_for_timing);
 
-#if IMAGE_OPERATION == 4
+#if IMAGE_OPERATION == 4 || IMAGE_OPERATION == 6
     error_code = clEnqueueReadBuffer(context.my_queue,context.output_buffer_object[0],CL_TRUE,0,
          context.image_data_bytes, context.SoA_image_output.R_plane, 0, NULL, &context.event_for_timing);
     if (CHECK_ERROR_CODE(error_code)) return 1;
@@ -284,7 +372,8 @@ int run_OpenCL_kernel(void) {
     error_code = clEnqueueReadBuffer(context.my_queue, context.output_buffer_object[3], CL_TRUE, 0,
         context.image_data_bytes, context.SoA_image_output.A_plane, 0, NULL, &context.event_for_timing);
     if (CHECK_ERROR_CODE(error_code)) return 1;
-#elif IMAGE_OPERATION == 5
+
+#elif IMAGE_OPERATION == 5 || IMAGE_OPERATION == 7
     error_code = clEnqueueReadBuffer(context.my_queue, context.output_buffer_object[0], CL_TRUE, 0,
         context.image_data_bytes*4, context.AoS_image_output, 0, NULL, &context.event_for_timing);
     if (CHECK_ERROR_CODE(error_code)) return 1;

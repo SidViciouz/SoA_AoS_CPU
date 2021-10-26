@@ -59,6 +59,7 @@ typedef struct _Context {
 
     cl_mem input_buffer_object[4];
     cl_mem output_buffer_object[4];
+    cl_mem GX_buffer_object, GY_buffer_object;
 
     size_t global_work_size[2];
     size_t local_work_size[2];

@@ -46,5 +46,11 @@
     <None Include="Source\Kernel\AoS_GS.cl">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="Source\Kernel\SoA.SO.cl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="Source\Kernel\AoS_SO.cl">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>
